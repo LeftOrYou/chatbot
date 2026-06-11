@@ -198,7 +198,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:8501", # 保留本地开发 # 云端前端域名,  # 允许 Streamlit 前端地址访问，关键点：allow_origins 设置允许来自 Streamlit 默认地址（http://localhost:8501）的跨域请求。
-                    "https://chatbot-production-1001.up.railway.app"]
+                    "https://chatbot-production-1001.up.railway.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
