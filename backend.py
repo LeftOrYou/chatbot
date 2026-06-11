@@ -30,22 +30,21 @@ if not api_key:
 # ------------------------------
 # 3. Redis配置
 # ------------------------------
-redis_url = os.getenv("REDIS_URL")
-if redis_url:
-    parsed = urlparse(redis_url)
+REDIS_URL = os.getenv("REDIS_URL")
+REDIS_DB = int(os.getenv("REDIS_DB", 0))
+SESSION_TTL = int(os.getenv("SESSION_TTL", 1800)) # 30分钟过期
+
+if REDIS_URL:
+    parsed = urlparse(REDIS_URL)
     REDIS_HOST = parsed.hostname
     REDIS_PORT = parsed.port
     REDIS_PASSWORD = parsed.password
-    REDIS_DB = parsed.db;
 else:
     # 本地开发 fallback
     REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
     REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
     REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
-    REDIS_DB = int(os.getenv("REDIS_DB", 0))
     
-SESSION_TTL = int(os.getenv("SESSION_TTL", 1800))  # 30分钟过期
-
 # 电商客服System Prompt
 SYSTEM_PROMPT = """
 你是一个专业、热情、高效的电商客服，名叫“小智”。
