@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
 import redis.asyncio as redis
+from urllib.parse import urlparse
 
 # ------------------------------
 # 1. 配置日志
@@ -29,9 +30,20 @@ if not api_key:
 # ------------------------------
 # 3. Redis配置
 # ------------------------------
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-REDIS_DB = int(os.getenv("REDIS_DB", 0))
+redis_url = os.getenv("REDIS_URL")
+if redis_url:
+    parsed = urlparse(redis_url)
+    REDIS_HOST = parsed.hostname
+    REDIS_PORT = parsed.port
+    REDIS_PASSWORD = parsed.password
+    REDIS_DB = parsed.db;
+else:
+    # 本地开发 fallback
+    REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+    REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+    REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", None)
+    REDIS_DB = int(os.getenv("REDIS_DB", 0))
+    
 SESSION_TTL = int(os.getenv("SESSION_TTL", 1800))  # 30分钟过期
 
 # 电商客服System Prompt
@@ -158,6 +170,7 @@ async def lifespan(app: FastAPI):
     redis_client = redis.Redis(
         host=REDIS_HOST,
         port=REDIS_PORT,
+        password=REDIS_PASSWORD,
         db=REDIS_DB,
         decode_responses=True  # 自动解码为字符串
     )
@@ -184,7 +197,8 @@ app = FastAPI(
 # ------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8501"],  # 允许 Streamlit 前端地址访问，关键点：allow_origins 设置允许来自 Streamlit 默认地址（http://localhost:8501）的跨域请求。
+    allow_origins=["http://localhost:8501", # 保留本地开发 # 云端前端域名,  # 允许 Streamlit 前端地址访问，关键点：allow_origins 设置允许来自 Streamlit 默认地址（http://localhost:8501）的跨域请求。
+                    "https://chatbot-production-1001.up.railway.app"]
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
