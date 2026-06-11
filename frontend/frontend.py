@@ -3,6 +3,8 @@ import streamlit as st
 import requests
 import json
 import time
+import os
+from dotenv import load_dotenv
 
 # ---------- 1. 页面配置 ----------
 st.set_page_config(page_title="智能客服", page_icon="🛒", layout="centered")
@@ -11,7 +13,12 @@ st.caption("我是您的购物助手，有什么可以帮您的吗？")
 
 # ---------- 2. 后端服务配置 ----------
 # 确保这里填写的端口和你的backend.py启动端口一致
-API_BASE_URL = "http://localhost:8000"
+if os.getenv("RAILWAY_ENVIRONMENT"):
+    # 在 Railway 上运行时，必须显式设置 BACKEND_URL
+    API_BASE_URL = os.getenv("BACKEND_URL")
+else:
+    # 本地开发
+    API_BASE_URL = "http://localhost:8000"
 
 # ---------- 3. 初始化会话状态 ----------
 if "session_id" not in st.session_state:
